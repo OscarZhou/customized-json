@@ -1,16 +1,20 @@
-package models
+package main
 
 import (
 	"encoding/json"
 	"errors"
 	"os"
+	"regexp"
 )
-
-var path = "files/"
 
 type ConfigParamters map[string]interface{}
 
 type ConfigKeys []string
+
+// New initialises an instance
+func New() (ConfigParamters, error) {
+	return ConfigParamters(make(map[string]interface{})), nil
+}
 
 // Add adds the key and value
 func (cp *ConfigParamters) Add(key string, value interface{}) error {
@@ -22,24 +26,32 @@ func (cp *ConfigParamters) Add(key string, value interface{}) error {
 }
 
 func (cp *ConfigParamters) CreateFile(filename string) error {
+	var (
+		file *os.File
+		path string
+	)
+
 	if filename == "" {
 		return errors.New("File name can't be null")
 	}
-	var file *os.File
 
-	filename = path + filename
-	// detect if file exists
-	_, err := os.Stat(filename)
+	folderpath, err := os.Getwd()
 	if err != nil {
 		return err
 	}
+	path = folderpath + "\\files\\"
 
-	// create file if not exists
-	if !os.IsNotExist(err) {
-		err := os.Remove(filename)
+	// detect if file exists
+	if _, err = os.Stat(path); os.IsNotExist(err) {
+		err = os.Mkdir("files", 0755)
 		if err != nil {
 			return err
 		}
+	}
+
+	match := regexp.MustCompile(`[.\d]*.json\z`).MatchString
+	if !match(filename) {
+		path = path + filename + ".json"
 	}
 
 	file, err = os.Create(path)
@@ -62,5 +74,6 @@ func (cp *ConfigParamters) CreateFile(filename string) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
