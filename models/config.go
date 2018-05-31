@@ -36,11 +36,18 @@ func NewConfig() *Config {
 		APIs:                make(map[string][]string),
 	}
 
+	customConfig := CustomConfig{
+		"Cached":                  true,
+		"CachedDurationsInSecond": 10,
+		"Authentication":          true,
+	}
+
 	serverTemplate := ServerTemplate{
 		ProjectVersion: "v0.4",
 		APIVersion:     "v1",
 		ProxySchema:    "http",
 		ProxyPass:      "127.0.0.1:9100",
+		CustomConfigs:  customConfig,
 	}
 	config.Templates = append(config.Templates, serverTemplate)
 
@@ -164,6 +171,7 @@ func (c *Config) OutputConfigFile(controllerPath string) error {
 					ProxyPass:     template.ProxyPass,
 					ProxyPassPath: "/" + apiName,
 					APIVersion:    template.APIVersion,
+					CustomConfigs: template.CustomConfigs,
 				}
 
 				c.Servers = append(c.Servers, s)

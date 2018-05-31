@@ -5,4 +5,5 @@ type ServerTemplate struct {
 	ProxySchema    string
 	ProxyPass      string
 	APIVersion     string
+	CustomConfigs  CustomConfig
 }

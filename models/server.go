@@ -1,5 +1,7 @@
 package models
 
+type CustomConfig map[string]interface{}
+
 type Server struct {
 	Method        string
 	Path          string
