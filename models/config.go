@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -12,45 +13,22 @@ import (
 )
 
 type Config struct {
-	// Templates map[string]ServerTemplate
-	Templates []ServerTemplate
-
-	// only can be assigned the value automatically
-	fileList []string
+	Templates []Template
 
 	// registers all http methods that the APIs
 	// contain
 	RegisteryAPIMethods map[string]string
 
-	// key is API name and the value indicates
-	// that what methods does this API have
-	APIs map[string][]string
-
 	Servers []Server
 }
 
-func NewConfig() *Config {
+func NewConfig(t []Template) *Config {
 
 	config := &Config{
-		// Templates:           make(map[string]ServerTemplate),
 		RegisteryAPIMethods: make(map[string]string),
-		APIs:                make(map[string][]string),
 	}
 
-	customConfig := CustomConfig{
-		"Cached":                  true,
-		"CachedDurationsInSecond": 10,
-		"Authentication":          true,
-	}
-
-	serverTemplate := ServerTemplate{
-		ProjectVersion: "v0.4",
-		APIVersion:     "v1",
-		ProxySchema:    "http",
-		ProxyPass:      "127.0.0.1:9100",
-		CustomConfigs:  customConfig,
-	}
-	config.Templates = append(config.Templates, serverTemplate)
+	config.Templates = append(config.Templates, t...)
 
 	config.RegisteryAPIMethods["GetByID"] = "GETBYID"
 	config.RegisteryAPIMethods["Get"] = "GET"
@@ -61,58 +39,42 @@ func NewConfig() *Config {
 	return config
 }
 
-func (c *Config) ScanAPIFiles(path string) error {
-	var files []string
-	err := filepath.Walk(path, func(path string, f os.FileInfo, err error) error {
-		files = append(files, path)
-		return nil
-	})
+func (c *Config) ScanAPIFiles() error {
+	fmt.Println(len(c.Templates))
+	for i, template := range c.Templates {
+		var files []string
+		fmt.Println("---------------------")
+		err := filepath.Walk(template.ControllerPath, func(path string, f os.FileInfo, err error) error {
+			files = append(files, path)
 
-	if err != nil {
-		return err
+			fmt.Printf("%d,%s\n", i, path)
+			return nil
+		})
+
+		if err != nil {
+			return err
+		}
+
+		c.Templates[i].fileList = append(c.Templates[i].fileList, files[1:]...)
 	}
-
-	c.fileList = append(c.fileList, files[1:]...)
 	return nil
 }
 
 func (c *Config) ParseAPIMethods() error {
-	if len(c.fileList) == 0 {
-		return errors.New("No files found")
-	}
-
-	for _, fileName := range c.fileList {
-		apiName, _ := getAPIName(fileName)
-
-		var apiMethods []string
-		// inFile, err := os.Open(fileName)
-		// if err != nil {
-		// 	return err
-		// }
-		// defer inFile.Close()
-
-		// scanner := bufio.NewScanner(inFile)
-		// scanner.Split(bufio.ScanLines)
-		// for scanner.Scan() {
-		// 	line := scanner.Text()
-		// 	reg1 := regexp.MustCompile("func").MatchString
-		// 	if reg1(line) {
-		// 		method, err := parseFuncName(line, c.RegisteryAPIMethods)
-		// 		if err != nil {
-		// 			return err
-		// 		}
-
-		// 		if method != "" {
-		// 			apiMethods = append(apiMethods, method)
-		// 		}
-		// 	}
-		// }
-
-		for _, value := range c.RegisteryAPIMethods {
-			apiMethods = append(apiMethods, value)
+	for i, template := range c.Templates {
+		if len(template.fileList) == 0 {
+			return errors.New("No files found")
 		}
 
-		c.APIs[apiName] = append(c.APIs[apiName], apiMethods...)
+		for _, fileName := range template.fileList {
+			apiName, _ := getAPIName(fileName)
+			var apiMethods []string
+			for _, value := range c.RegisteryAPIMethods {
+				apiMethods = append(apiMethods, value)
+			}
+
+			c.Templates[i].APIs[apiName] = append(c.Templates[i].APIs[apiName], apiMethods...)
+		}
 	}
 
 	return nil
@@ -151,8 +113,8 @@ func parseFuncName(line string, funcName map[string]string) (string, error) {
 	return method, nil
 }
 
-func (c *Config) OutputConfigFile(controllerPath string) error {
-	err := c.ScanAPIFiles(controllerPath)
+func (c *Config) OutputConfigFile(fileName string) error {
+	err := c.ScanAPIFiles()
 	if err != nil {
 		return err
 	}
@@ -161,12 +123,13 @@ func (c *Config) OutputConfigFile(controllerPath string) error {
 	if err != nil {
 		return err
 	}
-
 	for _, template := range c.Templates {
-		for apiName, methods := range c.APIs {
+
+		for apiName, methods := range template.APIs {
+
 			for _, m := range methods {
 				method := m
-				path := "/" + template.ProjectVersion + "/" + apiName
+				path := "/" + template.ServerTemplate.ProjectVersion + "/" + apiName
 				if method == "GETBYID" {
 					method = "GET"
 					path += "/:id"
@@ -175,11 +138,11 @@ func (c *Config) OutputConfigFile(controllerPath string) error {
 				s := Server{
 					Method:        method,
 					Path:          path,
-					ProxyScheme:   template.ProxySchema,
-					ProxyPass:     template.ProxyPass,
+					ProxyScheme:   template.ServerTemplate.ProxySchema,
+					ProxyPass:     template.ServerTemplate.ProxyPass,
 					ProxyPassPath: "/" + apiName,
-					APIVersion:    template.APIVersion,
-					CustomConfigs: template.CustomConfigs,
+					APIVersion:    template.ServerTemplate.APIVersion,
+					CustomConfigs: template.ServerTemplate.CustomConfigs,
 				}
 
 				c.Servers = append(c.Servers, s)
@@ -187,7 +150,7 @@ func (c *Config) OutputConfigFile(controllerPath string) error {
 		}
 	}
 
-	err = CreateFile("route", c.Servers)
+	err = CreateFile(fileName, c.Servers)
 	if err != nil {
 		return err
 	}
