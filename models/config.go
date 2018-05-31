@@ -1,7 +1,6 @@
 package models
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"os"
@@ -13,6 +12,7 @@ import (
 )
 
 type Config struct {
+	// Templates map[string]ServerTemplate
 	Templates []ServerTemplate
 
 	// only can be assigned the value automatically
@@ -32,6 +32,7 @@ type Config struct {
 func NewConfig() *Config {
 
 	config := &Config{
+		// Templates:           make(map[string]ServerTemplate),
 		RegisteryAPIMethods: make(map[string]string),
 		APIs:                make(map[string][]string),
 	}
@@ -84,27 +85,31 @@ func (c *Config) ParseAPIMethods() error {
 		apiName, _ := getAPIName(fileName)
 
 		var apiMethods []string
-		inFile, err := os.Open(fileName)
-		if err != nil {
-			return err
-		}
-		defer inFile.Close()
+		// inFile, err := os.Open(fileName)
+		// if err != nil {
+		// 	return err
+		// }
+		// defer inFile.Close()
 
-		scanner := bufio.NewScanner(inFile)
-		scanner.Split(bufio.ScanLines)
-		for scanner.Scan() {
-			line := scanner.Text()
-			reg1 := regexp.MustCompile("func").MatchString
-			if reg1(line) {
-				method, err := parseFuncName(line, c.RegisteryAPIMethods)
-				if err != nil {
-					return err
-				}
+		// scanner := bufio.NewScanner(inFile)
+		// scanner.Split(bufio.ScanLines)
+		// for scanner.Scan() {
+		// 	line := scanner.Text()
+		// 	reg1 := regexp.MustCompile("func").MatchString
+		// 	if reg1(line) {
+		// 		method, err := parseFuncName(line, c.RegisteryAPIMethods)
+		// 		if err != nil {
+		// 			return err
+		// 		}
 
-				if method != "" {
-					apiMethods = append(apiMethods, method)
-				}
-			}
+		// 		if method != "" {
+		// 			apiMethods = append(apiMethods, method)
+		// 		}
+		// 	}
+		// }
+
+		for _, value := range c.RegisteryAPIMethods {
+			apiMethods = append(apiMethods, value)
 		}
 
 		c.APIs[apiName] = append(c.APIs[apiName], apiMethods...)
@@ -159,11 +164,14 @@ func (c *Config) OutputConfigFile(controllerPath string) error {
 
 	for _, template := range c.Templates {
 		for apiName, methods := range c.APIs {
-			for _, method := range methods {
-				path := "/" + template.APIVersion + "/" + apiName
+			for _, m := range methods {
+				method := m
+				path := "/" + template.ProjectVersion + "/" + apiName
 				if method == "GETBYID" {
+					method = "GET"
 					path += "/:id"
 				}
+
 				s := Server{
 					Method:        method,
 					Path:          path,
