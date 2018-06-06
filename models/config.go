@@ -30,7 +30,6 @@ func NewConfig(t []Template) *Config {
 
 	config.Templates = append(config.Templates, t...)
 
-	config.RegisteryAPIMethods["GetByID"] = "GETBYID"
 	config.RegisteryAPIMethods["Get"] = "GET"
 	config.RegisteryAPIMethods["Post"] = "POST"
 	config.RegisteryAPIMethods["Patch"] = "PATCH"
@@ -43,11 +42,11 @@ func (c *Config) ScanAPIFiles() error {
 	fmt.Println(len(c.Templates))
 	for i, template := range c.Templates {
 		var files []string
-		fmt.Println("---------------------")
 		err := filepath.Walk(template.ControllerPath, func(path string, f os.FileInfo, err error) error {
-			files = append(files, path)
-
-			fmt.Printf("%d,%s\n", i, path)
+			// fmt.Printf("%d,%s\n", i, path)
+			if !f.IsDir() {
+				files = append(files, path)
+			}
 			return nil
 		})
 
@@ -128,8 +127,14 @@ func (c *Config) OutputConfigFile(fileName string) error {
 		for apiName, methods := range template.APIs {
 
 			for _, m := range methods {
+				path := ""
 				method := m
-				path := "/" + template.ServerTemplate.ProjectVersion + "/" + apiName
+				if template.ServerTemplate.ProjectVersion != "" {
+					path = "/" + template.ServerTemplate.ProjectVersion + "/" + apiName
+				} else {
+					path = "/" + apiName
+				}
+
 				if method == "GETBYID" {
 					method = "GET"
 					path += "/:id"
