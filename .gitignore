@@ -2,3 +2,4 @@ files/test.json
 templates/config.html
 public/css/router_configuration.css
 files/route.json
+models/custom_config_test.go
