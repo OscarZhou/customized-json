@@ -38,15 +38,20 @@ func NewConfig(t []Template) *Config {
 	return config
 }
 
+// Deprivation
+// ScanAPIFiles scans the file directory of APIs to generate RESTful API name
 func (c *Config) ScanAPIFiles() error {
 	fmt.Println(len(c.Templates))
 	for i, template := range c.Templates {
 		var files []string
 		err := filepath.Walk(template.ControllerPath, func(path string, f os.FileInfo, err error) error {
 			// fmt.Printf("%d,%s\n", i, path)
+
 			if !f.IsDir() {
+				// fmt.Printf("%d,%s\n", i, path)
 				files = append(files, path)
 			}
+
 			return nil
 		})
 
@@ -54,31 +59,33 @@ func (c *Config) ScanAPIFiles() error {
 			return err
 		}
 
-		c.Templates[i].fileList = append(c.Templates[i].fileList, files[1:]...)
+		c.Templates[i].fileList = append(c.Templates[i].fileList, files[0:]...)
 	}
 	return nil
 }
 
 func (c *Config) ParseAPIMethods() error {
 	for i, template := range c.Templates {
-		if len(template.fileList) == 0 {
-			return errors.New("No files found")
+		if len(template.Resources) == 0 {
+			return errors.New("Please add the API resource names")
 		}
 
-		for _, fileName := range template.fileList {
-			apiName, _ := getAPIName(fileName)
+		for _, resource := range template.Resources {
+			// apiName, _ := getAPIName(resource)
 			var apiMethods []string
 			for _, value := range c.RegisteryAPIMethods {
 				apiMethods = append(apiMethods, value)
 			}
 
-			c.Templates[i].APIs[apiName] = append(c.Templates[i].APIs[apiName], apiMethods...)
+			c.Templates[i].APIs[resource] = append(c.Templates[i].APIs[resource], apiMethods...)
 		}
 	}
 
 	return nil
 }
 
+// getAPIName parses the files' name in the directory of APIs
+// For example, path = "\user_info.go"
 func getAPIName(path string) (string, error) {
 	re := regexp.MustCompile(`[\w-]+\.`)
 	apiName := re.FindString(path)
@@ -113,19 +120,14 @@ func parseFuncName(line string, funcName map[string]string) (string, error) {
 }
 
 func (c *Config) OutputConfigFile(fileName string) error {
-	err := c.ScanAPIFiles()
-	if err != nil {
-		return err
-	}
 
-	err = c.ParseAPIMethods()
+	err := c.ParseAPIMethods()
 	if err != nil {
 		return err
 	}
 	for _, template := range c.Templates {
 
 		for apiName, methods := range template.APIs {
-
 			for _, m := range methods {
 				path := ""
 				method := m
