@@ -2,6 +2,9 @@ package main
 
 import (
 	"customized-json/models"
+	"html/template"
+	"log"
+	"net/http"
 )
 
 var templates []models.Template
@@ -61,11 +64,30 @@ func init() {
 
 }
 
-func main() {
-	c := models.NewConfig(templates)
-	err := c.OutputConfigFile("route")
+func displayHandler(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("public/index.html")
 	if err != nil {
+		log.Fatal(err)
 		panic(err)
 	}
+	t.Execute(w, templates)
+}
 
+func makeHandler(fn func(w http.ResponseWriter, r *http.Request)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fn(w, r)
+	}
+}
+
+func main() {
+
+	http.HandleFunc("/index", makeHandler(displayHandler))
+
+	// c := models.NewConfig(templates)
+	// err := c.OutputConfigFile("route")
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	http.ListenAndServe(":7000", nil)
 }
