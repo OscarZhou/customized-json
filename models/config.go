@@ -13,6 +13,8 @@ import (
 )
 
 type Config struct {
+	Title string
+
 	Templates []Template
 
 	// registers all http methods that the APIs

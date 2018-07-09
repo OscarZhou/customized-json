@@ -1,0 +1,69 @@
+body{
+    padding-top: 30px;
+    margin: 0 auto;
+    width: 100%;
+    height: auto;
+    border: 1px solid #FF0000;
+}
+
+aside{
+    width: 20%;
+    float: left;
+    border: 1px solid #00FF00;
+}
+
+.form-control{
+    float:right;
+    width: 400px;
+}
+
+.btn-area{
+    text-align: right;
+}
+
+.button-group {
+    text-align: right;
+}
+
+div.container{
+    
+    margin-top: 100px;
+    border: 1px solid #000;
+    border-radius: 10px;
+    padding: 20px 15px;
+    
+}
+
+.button-group input:hover{
+    cursor: pointer;
+}
+
+/* OAuth登录提交按钮 */
+div.OauthSignIn{
+    text-align: center;
+}
+
+div.SignInWithAuth0{
+    text-align: center;
+}
+
+.OauthSignIn div{
+    margin-top: 10px;
+    text-align: center;
+}
+.OauthSignIn a{
+    width:200px;
+}
+ 
+.OauthSignIn a:hover{
+    cursor: pointer;
+}
+
+#SignInWithAuth0 a{
+    padding:9px;
+    border: 1px solid rgb(185, 188, 190);
+    border-radius: 2px;
+    text-decoration: none;
+    color: #E16531;
+}
+

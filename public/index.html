@@ -1,8 +1,29 @@
-<h1>Add JSON Configuration</h1>
+<!DOCTYPE html>
 
-<form action="/save/{{.Title}}" method="POST">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="/public/css/bootstrap.css" rel="stylesheet" />
+    <link href="/public/css/main.css" rel="stylesheet" />
+    <script type="text/javascript" src="/public/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/public/js/jquery-3.1.1.js"></script>
+    <title>Go dynamic JSON</title>
 
-    
-<div><textarea name="body" rows="20" cols="80">{{printf "%s" .Body}}</textarea></div>
-<div><input type="submit" value="Save"></div>
-</form>
+    <script type="text/javascript">
+
+    </script>
+</head>
+
+<body>
+    <div class="container col-lg-8 col-lg-push-2">
+        <form action="/generate/{{.Title}}" method="POST">
+            <div>
+                {{.Title}}
+            </div>
+            <input type="submit" value="Save">
+        </form>
+    </div>
+</body>
+
+</html>
+

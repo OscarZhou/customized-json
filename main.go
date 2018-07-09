@@ -2,6 +2,9 @@ package main
 
 import (
 	"customized-json/models"
+	"fmt"
+	"html/template"
+	"net/http"
 )
 
 var templates []models.Template
@@ -96,13 +99,34 @@ func init() {
 
 }
 
-func main() {
-	// http.HandleFunc("/index")
-
-	c := models.NewConfig(templates)
-	err := c.OutputConfigFile("route")
+func indexHandler(w http.ResponseWriter, r *http.Request, jt models.JSONTemplate) {
+	t, err := template.ParseFiles("public/index.html")
 	if err != nil {
-		panic(err)
+		http.Error(w, "fail to render index.html", http.StatusInternalServerError)
 	}
 
+	fmt.Println("----", t)
+	t.Execute(w, jt)
+}
+
+func makeHandler(fn func(w http.ResponseWriter, r *http.Request, jt models.JSONTemplate)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// c := models.NewConfig(templates)
+		jt := models.JSONTemplate{
+			Title: "First jt",
+		}
+		fn(w, r, jt)
+	}
+}
+
+func main() {
+	// c := models.NewConfig(templates)
+	// err := c.OutputConfigFile("route")
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	http.HandleFunc("/index", makeHandler(indexHandler))
+
+	http.ListenAndServe(":7000", nil)
 }

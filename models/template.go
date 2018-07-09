@@ -1,6 +1,7 @@
 package models
 
 type Template struct {
+	Title          string
 	ControllerPath string
 	ServerTemplate ServerTemplate
 	// only can be assigned the value automatically
