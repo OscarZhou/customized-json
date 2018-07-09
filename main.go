@@ -2,9 +2,10 @@ package main
 
 import (
 	"customized-json/models"
-	"fmt"
 	"html/template"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 var templates []models.Template
@@ -99,23 +100,31 @@ func init() {
 
 }
 
-func indexHandler(w http.ResponseWriter, r *http.Request, jt models.JSONTemplate) {
+func indexHandler(ctx *gin.Context, jt models.JSONTemplate) {
 	t, err := template.ParseFiles("public/index.html")
 	if err != nil {
-		http.Error(w, "fail to render index.html", http.StatusInternalServerError)
+		ctx.String(http.StatusInternalServerError, "fail to render index.html", nil)
+		return
 	}
-
-	fmt.Println("----", t)
-	t.Execute(w, jt)
+	t.Execute(ctx.Writer, jt)
 }
 
-func makeHandler(fn func(w http.ResponseWriter, r *http.Request, jt models.JSONTemplate)) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func makeHandler(fn func(ctx *gin.Context, jt models.JSONTemplate)) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
 		// c := models.NewConfig(templates)
 		jt := models.JSONTemplate{
 			Title: "First jt",
 		}
-		fn(w, r, jt)
+		fn(ctx, jt)
+	}
+}
+
+func push(w http.ResponseWriter, resource string) {
+	pusher, ok := w.(http.Pusher)
+	if ok {
+		if err := pusher.Push(resource, nil); err == nil {
+			return
+		}
 	}
 }
 
@@ -126,7 +135,15 @@ func main() {
 	// 	panic(err)
 	// }
 
-	http.HandleFunc("/index", makeHandler(indexHandler))
+	r := gin.Default()
+	r.HandleMethodNotAllowed = true
+	// r.StaticFile("bootstrap.css", "./public/css/bootstrap.css")
+	// r.StaticFile("main.css", "./public/css/main.css")
+	// r.StaticFile("bootstrap.js", "./public/js/bootstrap.js")
+	// r.StaticFile("jquery-3.1.1.js", "./public/js/jquery-3.1.1.js")
 
-	http.ListenAndServe(":7000", nil)
+	r.StaticFS("/public", http.Dir("public"))
+
+	r.Handle("GET", "/index", makeHandler(indexHandler))
+	r.Run(":7000")
 }

@@ -67,3 +67,16 @@ div.SignInWithAuth0{
     color: #E16531;
 }
 
+input{
+    text-align: right;
+    margin-right: 10px;
+}
+
+div.group {
+    border: 1px solid blue;
+    
+}
+
+.table{
+    
+}
