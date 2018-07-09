@@ -11,23 +11,19 @@
     <title>Go dynamic JSON</title>
 
     <script type="text/javascript">
-    var no = 1
-        
-
+        var no = 1
         $(function(){
             $("#add").click(function(){
                 no++
-                $tr = `<tr scope="row">
+                $tr = $(`<tr scope="row">
                             <th>`+no+`</th>
                             <td>
-                                <input type="text" />
+                                <input type="text" class="key-name"/>
                             </td>
                             <td>
                                 <div class="dropdown">
-                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true"
-                                        aria-expanded="false">
-                                        string 
-                                    </button>
+                                    <button class="key-type btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false" value="string">string</button>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                         <a class="dropdown-item" type="text">string</a>
                                         <a class="dropdown-item" type="text">numeric</a>
@@ -35,9 +31,36 @@
                                     </div>
                                 </div>
                             </td>
-                            </tr>`
-                $(".table").append($tr)
+                        </tr>`)
+                // $("tbody").append($tr)
+                $tr.appendTo($("tbody"))
             })
+
+            // this allows to bind event to html elements that are added dynamically
+            $("body").on("click",".dropdown-item",function(){
+                $nearestKeyType = $(this).parent().prev(":button")
+                $nearestKeyType.val($(this).text()).text($(this).text())
+            });
+
+            $("#save").click(function(){
+                var names
+                $(".key-name").each(function(){
+                    names.push($(this).val())
+                })
+                
+                var types
+                $(".key-type").each(function(){
+                    types.push($(this).val())
+                })
+
+                var keyPairs
+                for (var i=0; i<names.length; i++){
+                        keyPair += names[i]+" "+types[i]
+                        keyPairs.push(keyPair)
+                }
+
+                alert(keyPairs)
+           })
         })
     </script>
 </head>
@@ -61,13 +84,13 @@
                         <tr scope="row">
                             <th>1</th>
                             <td>
-                                <input type="text" />
+                                <input type="text" class="key-name"/>
                             </td>
                             <td>
                                 <div class="dropdown">
-                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true"
-                                        aria-expanded="false">
-                                        string 
+                                    <button class="key-type btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false" value="string">
+                                        string
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                         <a class="dropdown-item" type="text">string</a>
@@ -76,13 +99,13 @@
                                     </div>
                                 </div>
                             </td>
-                            </tr>
+                        </tr>
                     </tbody>
                 </table>
             </div>
-                <input id="add" type="button" class="btn btn-primary" value="Add New Field" />
-                <input id="save" type="button" class="btn btn-primary" value="Save Structure" />
-                <input id="export" type="button" class="btn btn-primary" value="Export JSON" />
+            <input id="add" type="button" class="btn btn-primary" value="Add New Field" />
+            <input id="save" type="button" class="btn btn-primary" value="Save Structure" />
+            <input id="export" type="button" class="btn btn-primary" value="Export JSON" />
             <input type="submit" value="Save">
         </form>
     </div>
