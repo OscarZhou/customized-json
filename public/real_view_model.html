@@ -43,19 +43,19 @@
             });
 
             $("#save").click(function(){
-                var names
+                var names = []
                 $(".key-name").each(function(){
                     names.push($(this).val())
                 })
                 
-                var types
+                var types = []
                 $(".key-type").each(function(){
                     types.push($(this).val())
                 })
 
-                var keyPairs
+                var keyPairs = []
                 for (var i=0; i<names.length; i++){
-                        keyPair += names[i]+" "+types[i]
+                        var keyPair = names[i]+" "+types[i]
                         keyPairs.push(keyPair)
                 }
 
@@ -67,9 +67,9 @@
 
 <body>
     <div class="container col-lg-8 col-lg-push-2">
-        <form action="/generate/{{.Title}}" method="POST">
+        <form action="/GenerateModel" method="POST">
             <h2>
-                Struct Name:<input type="text" value="" />
+                File Name:<input type="input" name="title" text= {{printf "%s" .ModelName}}  />  
             </h2>
             <div class="col-sm-5 col-sm-push-2">
                 <table class="table">
@@ -81,15 +81,16 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{range $i, $v := .KeyTypes}}
                         <tr scope="row">
                             <th>1</th>
                             <td>
-                                <input type="text" class="key-name"/>
+                                <input type="text" class="key-name" name="key" text= {{printf "%s" $v.Key}} />
                             </td>
                             <td>
                                 <div class="dropdown">
                                     <button class="key-type btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true"
-                                        aria-expanded="false" value="string">
+                                        aria-expanded="false" name="type" value= {{printf "%s" $v.Type}} >
                                         string
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
@@ -100,13 +101,13 @@
                                 </div>
                             </td>
                         </tr>
+                        {{end}}
                     </tbody>
                 </table>
             </div>
-            <input id="add" type="button" class="btn btn-primary" value="Add New Field" />
-            <input id="save" type="button" class="btn btn-primary" value="Save Structure" />
+            <input id="add" type="button" class="btn btn-primary" value="New Field" />
+            <input id="save" type="submit" class="btn btn-primary" value="Save Structure" />
             <input id="export" type="button" class="btn btn-primary" value="Export JSON" />
-            <input type="submit" value="Save">
         </form>
     </div>
 </body>

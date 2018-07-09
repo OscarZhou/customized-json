@@ -2,6 +2,7 @@ package main
 
 import (
 	"customized-json/models"
+	"fmt"
 	"html/template"
 	"net/http"
 
@@ -100,8 +101,47 @@ func init() {
 
 }
 
+func createModelHandler(ctx *gin.Context) {
+	ms := models.ModelStruct{}
+	t, err := template.ParseFiles("public/create_model.html")
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "fail to render CreateModel.html", nil)
+		return
+	}
+	t.Execute(ctx.Writer, ms)
+}
+
+func generateModelHandler(ctx *gin.Context) {
+	var jsonTemplate models.JSONTemplate
+	jsonTemplate.Title = ctx.Param("filename")
+	jsonTemplate.Content = ctx.PostForm("content")
+
+	if err := jsonTemplate.Save(); err != nil {
+		fmt.Println(err)
+	}
+
+	// keyPairs := strings.Split(content, ",")
+	// for _, v := range keyPairs {
+	// 	pairs := strings.TrimSpace(v)
+	// 	s := strings.Split(pairs, " ")
+	// 	jsonTemplate.Content
+	// }
+
+}
+
+func viewModelHandler(ctx *gin.Context) {
+
+	ms := models.ModelStruct{}
+	t, err := template.ParseFiles("public/view_model.html")
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "fail to render ViewModel.html", nil)
+		return
+	}
+	t.Execute(ctx.Writer, ms)
+}
+
 func indexHandler(ctx *gin.Context, jt models.JSONTemplate) {
-	t, err := template.ParseFiles("public/index.html")
+	t, err := template.ParseFiles("public/create_model.html")
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, "fail to render index.html", nil)
 		return
@@ -119,15 +159,6 @@ func makeHandler(fn func(ctx *gin.Context, jt models.JSONTemplate)) gin.HandlerF
 	}
 }
 
-func push(w http.ResponseWriter, resource string) {
-	pusher, ok := w.(http.Pusher)
-	if ok {
-		if err := pusher.Push(resource, nil); err == nil {
-			return
-		}
-	}
-}
-
 func main() {
 	// c := models.NewConfig(templates)
 	// err := c.OutputConfigFile("route")
@@ -137,13 +168,11 @@ func main() {
 
 	r := gin.Default()
 	r.HandleMethodNotAllowed = true
-	// r.StaticFile("bootstrap.css", "./public/css/bootstrap.css")
-	// r.StaticFile("main.css", "./public/css/main.css")
-	// r.StaticFile("bootstrap.js", "./public/js/bootstrap.js")
-	// r.StaticFile("jquery-3.1.1.js", "./public/js/jquery-3.1.1.js")
 
 	r.StaticFS("/public", http.Dir("public"))
 
-	r.Handle("GET", "/index", makeHandler(indexHandler))
+	r.Handle("GET", "/CreateModel", createModelHandler)
+	r.Handle("POST", "/GenerateModel/:filename", generateModelHandler)
+	// r.Handle("GET", "/CreateModel", makeHandler(indexHandler))
 	r.Run(":7000")
 }
