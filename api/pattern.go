@@ -15,6 +15,9 @@ func GetPattern(ctx *gin.Context, p logic.Mapper) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, keys)
+	// ctx.JSON(http.StatusOK, keys)
+	ctx.HTML(http.StatusOK, "add_pattern.html", gin.H{
+		"Pattern": keys,
+	})
 	return
 }

@@ -179,12 +179,18 @@ func makeHandler(fn func(ctx *gin.Context, jt models.JSONTemplate)) gin.HandlerF
 	}
 }
 
-func containHandler(fn func(ctx *gin.Context, p logic.Mapper)) gin.HandlerFunc {
+func mapContainer(fn func(ctx *gin.Context, p logic.Mapper)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-
 		t, _ := logic.Default()
 		m, _ := t.MapOut()
 		fn(ctx, m)
+	}
+}
+
+func templateContainer(fn func(ctx *gin.Context, t logic.Templator)) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		t, _ := logic.Default()
+		fn(ctx, t)
 	}
 }
 
@@ -211,7 +217,8 @@ func main() {
 	r.GET("/ViewModel", viewModelHandler)
 	r.GET("/GenerateModel/:filename", generateModelHandler)
 
-	r.GET("/ViewPattern", containHandler(api.GetPattern))
+	r.GET("/AddPattern", mapContainer(api.GetPattern))
+	r.GET("/GetTemplate", templateContainer(api.GetTemplate))
 
 	// r.Handle("GET", "/CreateModel", makeHandler(indexHandler))
 	r.Run(":7000")

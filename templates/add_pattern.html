@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="/public/css/bootstrap.css" rel="stylesheet" />
+    <link href="/public/css/main.css" rel="stylesheet" />
+    <script type="text/javascript" src="/public/js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="/public/js/bootstrap.bundle.js"></script>
+    <script type="text/javascript" src="/public/js/bootstrap.js"></script>
+    <title>Go dynamic JSON</title>
+
+    <script type="text/javascript">
+        $(function(){
+            $.get("http://localhost:7000/GetTemplate", function(data, status){
+                $("#template").append(data)
+                // $("#template").addClass("card")
+            })
+
+         
+        })
+    </script>
+</head>
+
+<body>
+    <div class="container col-lg-8 col-lg-push-2">
+        
+        <form action="/GenerateModel" method="POST">
+            <div class="col-sm-4 col-sm-push-8 float-left">
+                    <h3>
+                        Template                    
+                    </h3>
+                    <div id="template" class="card">
+    
+                    </div>
+    
+                </div>
+            <div class="col-sm-6 float-right">
+                    <h3 style="color: red;">
+                            Pattern should be seperated by ";"
+                        </h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Pattern Name</th>
+                            <th scope="col">Pattern Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ range $i, $v := .Pattern }}
+                        <tr scope="row">
+                            <th> {{ $i }}</th>
+                            <td>
+                                {{ $v }}
+                            </td>
+                            <td>
+                               <textarea name="pattern_value" >
+                                    
+                               </textarea> 
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            <input id="save" type="submit" class="btn btn-primary" value="Save Structure" />
+            <input id="export" type="button" class="btn btn-primary" value="Export JSON" />
+            </div>
+           
+        </form>
+    </div>
+</body>
+
+</html>
+

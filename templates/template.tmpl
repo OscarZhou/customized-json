@@ -1,0 +1,7 @@
+<div class="card_container">
+    {<br/> 
+        {{ range $key, $type := .KeyTypes }}
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key"> {{ $key }} </span> ( {{ $type }} )<br/>
+    {{ end }}
+    }
+</div>
