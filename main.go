@@ -1,8 +1,9 @@
 package main
 
 import (
+	"customized-json/api"
+	"customized-json/logic"
 	"customized-json/models"
-	"fmt"
 	"html/template"
 	"net/http"
 	"os"
@@ -133,7 +134,6 @@ func generateModelHandler(ctx *gin.Context) {
 
 func viewModelHandler(ctx *gin.Context) {
 	if err := filepath.Walk("files/", func(path string, info os.FileInfo, err error) error {
-		fmt.Println("path is ", path)
 		if !info.IsDir() {
 			jsonTemplate, err := models.LoadJSONTemplate(path)
 			if err != nil {
@@ -179,6 +179,15 @@ func makeHandler(fn func(ctx *gin.Context, jt models.JSONTemplate)) gin.HandlerF
 	}
 }
 
+func containHandler(fn func(ctx *gin.Context, p logic.Mapper)) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+
+		t, _ := logic.Default()
+		m, _ := t.MapOut()
+		fn(ctx, m)
+	}
+}
+
 func main() {
 	// c := models.NewConfig(templates)
 	// err := c.OutputConfigFile("route")
@@ -201,6 +210,8 @@ func main() {
 	r.GET("/CreateModel", createModelHandler)
 	r.GET("/ViewModel", viewModelHandler)
 	r.GET("/GenerateModel/:filename", generateModelHandler)
+
+	r.GET("/ViewPattern", containHandler(api.GetPattern))
 
 	// r.Handle("GET", "/CreateModel", makeHandler(indexHandler))
 	r.Run(":7000")
