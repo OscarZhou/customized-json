@@ -36,10 +36,10 @@
 
                 var keyPairs = []
                 for (var i=0; i<names.length; i++){
-                        var keyPair = names[i]+" "+values[i]
+                        var keyPair = names[i]+":"+values[i]
                         keyPairs.push(keyPair)
                 }
-                var keys = keyPairs.join(", ")
+                var keys = keyPairs.join(";")
                 $.post("http://localhost:7000/SetPattern", 
                 {content:keys},
                 function(result){
@@ -64,7 +64,7 @@
                 </div>
             <div class="col-sm-6 float-right">
                     <h3 style="color: red;">
-                            Pattern should be seperated by ";"
+                            Pattern should be seperated by ","
                         </h3>
                 <table class="table">
                     <thead>

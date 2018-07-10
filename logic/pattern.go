@@ -30,27 +30,53 @@ func (p *Pattern) ToKeys() ([]string, error) {
 	return ks, nil
 }
 
+// Assemble splits the pattern string to map[string][]string
 func (p *Pattern) Assemble(content string) error {
-	fmt.Println(content)
-	keyPairs := strings.Split(content, ",")
+
+	content = `$Method:GET,POST,PATCH,DELETE;$Resource:Schools,Favourites;
+	$Version:v1,v0;$ProxyScheme:http;$ProxyDomain:127.0.0.1;
+	$ProxyPort:8021;$ProxyVersion:v1`
+
+	s := strings.Replace(content, "$", "", -1)
+	s = strings.Replace(s, "\r\n", "", -1)
+	s = strings.Replace(s, "\n", "", -1)
+	s = strings.Replace(s, " ", "", -1)
+	keyPairs := strings.Split(s, ";")
 	for _, v := range keyPairs {
-		pairs := strings.TrimSpace(v)
-		s := strings.Split(pairs, " ")
-		if len(s) != 2 {
+		pairs := strings.Split(strings.TrimSpace(v), ":")
+		if len(pairs) != 2 {
 			return errors.New("format is invalid")
 		}
 
-		// modelStruct.KeyTypes = append(modelStruct.KeyTypes, KeyType{Key: s[0], Type: s[1]})
+		values := strings.Split(strings.TrimSpace(pairs[1]), ",")
+		if len(values) < 1 {
+			return errors.New("pattern value format is invalid")
+		}
+		(*p)[pairs[0]] = values
 	}
-	// return modelStruct, nil
 
-	// keys, err := p.ToKeys()
-	// if err != nil {
-	// 	return err
+	keys, err := p.ToKeys()
+	if err != nil {
+		return err
+	}
+
+	for _, key := range keys {
+		p.Export(key)
+	}
+
+	fmt.Println(*p)
+	return nil
+}
+
+// Export exports JSON file
+func (p *Pattern) Export(key string) error {
+	// values, ok := (*p)[key]
+	// if !ok {
+	// 	return errors.New("key:" + key + " is not found")
 	// }
 
-	// for _, v := range keys {
-
+	// for _, v:=range values{
+	// 	p.
 	// }
 	return nil
 }
