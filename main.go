@@ -187,6 +187,13 @@ func mapContainer(fn func(ctx *gin.Context, p logic.Mapper)) gin.HandlerFunc {
 	}
 }
 
+func assembleContainer(fn func(ctx *gin.Context, p logic.Assembler)) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		p := make(logic.Pattern)
+		fn(ctx, &p)
+	}
+}
+
 func templateContainer(fn func(ctx *gin.Context, t logic.Templator)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		t, _ := logic.Default()
@@ -219,6 +226,7 @@ func main() {
 
 	r.GET("/AddPattern", mapContainer(api.GetPattern))
 	r.GET("/GetTemplate", templateContainer(api.GetTemplate))
+	r.POST("/SetPattern", assembleContainer(api.SetPattern))
 
 	// r.Handle("GET", "/CreateModel", makeHandler(indexHandler))
 	r.Run(":7000")

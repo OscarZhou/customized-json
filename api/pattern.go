@@ -2,6 +2,7 @@ package api
 
 import (
 	"customized-json/logic"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +23,9 @@ func GetPattern(ctx *gin.Context, p logic.Mapper) {
 	return
 }
 
-func SetPattern(ctx *gin.Context, p logic.Assembler, s string) {
+func SetPattern(ctx *gin.Context, p logic.Assembler) {
+	s := ctx.PostForm("content")
+	fmt.Println("-----------", s)
 	err := p.Assemble(s)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err)

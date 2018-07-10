@@ -26,18 +26,13 @@
                     }
                 })
 
-                alert("name = "+names)
-                
                 var values = []
-                $("textare[name='pattern_value']").each(function(){
-                    var value = $(this).text()
+                $("textarea[name='pattern_value']").each(function(){
+                    var value = $(this).val()
                     if (value != "") {
                         values.push(value)
                     }
-                    values.push(value)
                 })
-
-                alert("value = "+value)
 
                 var keyPairs = []
                 for (var i=0; i<names.length; i++){
@@ -45,7 +40,7 @@
                         keyPairs.push(keyPair)
                 }
                 var keys = keyPairs.join(", ")
-                $.post("http://localhost:7000/GenerateModel/"+$("#filename").val(), 
+                $.post("http://localhost:7000/SetPattern", 
                 {content:keys},
                 function(result){
                 })

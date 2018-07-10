@@ -2,7 +2,9 @@ package logic
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
+	"strings"
 )
 
 // Pattern is alias of data type map[string][]string
@@ -29,17 +31,17 @@ func (p *Pattern) ToKeys() ([]string, error) {
 }
 
 func (p *Pattern) Assemble(content string) error {
+	fmt.Println(content)
+	keyPairs := strings.Split(content, ",")
+	for _, v := range keyPairs {
+		pairs := strings.TrimSpace(v)
+		s := strings.Split(pairs, " ")
+		if len(s) != 2 {
+			return errors.New("format is invalid")
+		}
 
-	// keyPairs := strings.Split(content, ",")
-	// for _, v := range keyPairs {
-	// 	pairs := strings.TrimSpace(v)
-	// 	s := strings.Split(pairs, " ")
-	// 	if len(s) != 2 {
-	// 		return  errors.New("format is invalid")
-	// 	}
-
-	// 	modelStruct.KeyTypes = append(modelStruct.KeyTypes, KeyType{Key: s[0], Type: s[1]})
-	// }
+		// modelStruct.KeyTypes = append(modelStruct.KeyTypes, KeyType{Key: s[0], Type: s[1]})
+	}
 	// return modelStruct, nil
 
 	// keys, err := p.ToKeys()
