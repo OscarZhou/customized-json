@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="/public/css/bootstrap.css" rel="stylesheet" />
+    <link href="/public/css/main.css" rel="stylesheet" />
+    <script type="text/javascript" src="/public/js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="/public/js/bootstrap.bundle.js"></script>
+    <script type="text/javascript" src="/public/js/bootstrap.js"></script>
+    <title>Go dynamic JSON</title>
+
+    <script type="text/javascript">
+        var no = 1
+        $(function(){
+            $("#add").click(function(){
+                no++
+                $tr = $(`<tr scope="row">
+                            <th>`+no+`</th>
+                            <td>
+                                <input type="text" class="key-name"/>
+                            </td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="key-type btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false" value="string">string</button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                        <a class="dropdown-item" type="text">string</a>
+                                        <a class="dropdown-item" type="text">numeric</a>
+                                        <a class="dropdown-item" type="text">bool</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>`)
+                // $("tbody").append($tr)
+                $tr.appendTo($("tbody"))
+            })
+
+            // this allows to bind event to html elements that are added dynamically
+            $("body").on("click",".dropdown-item",function(){
+                $nearestKeyType = $(this).parent().prev(":button")
+                $nearestKeyType.val($(this).text()).text($(this).text())
+            });
+
+            $("#save").click(function(){
+                var names = []
+                $(".key-name").each(function(){
+                    names.push($(this).val())
+                })
+                
+                var types = []
+                $(".key-type").each(function(){
+                    types.push($(this).val())
+                })
+
+                var keyPairs = []
+                for (var i=0; i<names.length; i++){
+                        var keyPair = names[i]+" "+types[i]
+                        keyPairs.push(keyPair)
+                }
+
+                alert(keyPairs)
+           })
+        })
+    </script>
+</head>
+
+<body>
+    <div class="container col-lg-8 col-lg-push-2">
+        <form action="/GenerateModel" method="POST">
+            <h2>
+                File Name:<input type="input" name="title" value= {{ printf "%s" .ModelTitle}}  />  
+            </h2>
+            <div class="col-sm-5 col-sm-push-2">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Key Name</th>
+                            <th scope="col">Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range $i, $v := .KeyTypes}}
+                        <tr scope="row">
+                            <th>1</th>
+                            <td>
+                                <input type="text" class="key-name" name="key" text= {{printf "%s" $v.Key}} />
+                            </td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="key-type btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false" name="type" value= {{printf "%s" $v.Type}} >
+                                        string
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                        <a class="dropdown-item" type="text">string</a>
+                                        <a class="dropdown-item" type="text">numeric</a>
+                                        <a class="dropdown-item" type="text">bool</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+            <input id="add" type="button" class="btn btn-primary" value="New Field" />
+            <input id="save" type="submit" class="btn btn-primary" value="Save Structure" />
+            <input id="export" type="button" class="btn btn-primary" value="Export JSON" />
+        </form>
+    </div>
+</body>
+
+</html>
+

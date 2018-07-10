@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 )
@@ -102,13 +104,12 @@ func init() {
 }
 
 func createModelHandler(ctx *gin.Context) {
-	ms := models.ModelStruct{}
-	t, err := template.ParseFiles("public/create_model.html")
+	t, err := template.ParseFiles("templates/create_model.html")
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, "fail to render CreateModel.html", nil)
 		return
 	}
-	t.Execute(ctx.Writer, ms)
+	t.Execute(ctx.Writer, nil)
 }
 
 func generateModelHandler(ctx *gin.Context) {
@@ -117,31 +118,50 @@ func generateModelHandler(ctx *gin.Context) {
 	jsonTemplate.Content = ctx.PostForm("content")
 
 	if err := jsonTemplate.Save(); err != nil {
-		fmt.Println(err)
+		ctx.String(http.StatusInternalServerError, "error: %v", err)
+		return
 	}
 
-	// keyPairs := strings.Split(content, ",")
-	// for _, v := range keyPairs {
-	// 	pairs := strings.TrimSpace(v)
-	// 	s := strings.Split(pairs, " ")
-	// 	jsonTemplate.Content
-	// }
+	_, err := jsonTemplate.Parse()
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "error: %v", err)
+		return
+	}
 
+	ctx.Redirect(http.StatusMovedPermanently, "/ViewModel")
 }
 
 func viewModelHandler(ctx *gin.Context) {
+	if err := filepath.Walk("files/", func(path string, info os.FileInfo, err error) error {
+		fmt.Println("path is ", path)
+		if !info.IsDir() {
+			jsonTemplate, err := models.LoadJSONTemplate(path)
+			if err != nil {
+				if jsonTemplate == nil {
+					return nil
+				}
+				return err
+			}
 
-	ms := models.ModelStruct{}
-	t, err := template.ParseFiles("public/view_model.html")
-	if err != nil {
-		ctx.String(http.StatusInternalServerError, "fail to render ViewModel.html", nil)
+			modelStruct, err := jsonTemplate.Parse()
+			if err != nil {
+				return err
+			}
+			t, err := template.ParseFiles("templates/view_model.html")
+			if err != nil {
+				return err
+			}
+			t.Execute(ctx.Writer, modelStruct)
+		}
+		return nil
+	}); err != nil {
+		ctx.String(http.StatusInternalServerError, "error: %v", err)
 		return
 	}
-	t.Execute(ctx.Writer, ms)
 }
 
 func indexHandler(ctx *gin.Context, jt models.JSONTemplate) {
-	t, err := template.ParseFiles("public/create_model.html")
+	t, err := template.ParseFiles("templates/create_model.html")
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, "fail to render index.html", nil)
 		return
@@ -170,9 +190,18 @@ func main() {
 	r.HandleMethodNotAllowed = true
 
 	r.StaticFS("/public", http.Dir("public"))
+	r.LoadHTMLGlob("templates/*")
 
-	r.Handle("GET", "/CreateModel", createModelHandler)
-	r.Handle("POST", "/GenerateModel/:filename", generateModelHandler)
+	// r.GET("/Error", func(ctx *gin.Context ))}{
+	// 	ctx.HTML(http.StatusOK, "error.tmpl", gin.H{
+	// 		"message":""
+	// 	})
+	// }
+
+	r.GET("/CreateModel", createModelHandler)
+	r.GET("/ViewModel", viewModelHandler)
+	r.GET("/GenerateModel/:filename", generateModelHandler)
+
 	// r.Handle("GET", "/CreateModel", makeHandler(indexHandler))
 	r.Run(":7000")
 }

@@ -1,8 +1,8 @@
 package models
 
 type ModelStruct struct {
-	ModelName string
-	KeyTypes  []KeyType
+	ModelTitle string
+	KeyTypes   []KeyType
 }
 
 type KeyType struct {
