@@ -20,9 +20,10 @@ type DefaultTemplate struct {
 	ProxyDomain   string `json:"proxy_domain"`
 	ProxyPort     string `json:"proxy_port"`
 	ProxyPass     string `cj:"-"`
-	ProxyPassPath string `json:"proxy_pass_path"`
+	ProxyPassPath string `cj:"-"`
 	ProxyVersion  string `json:"proxy_version"`
 	// CustomConfigs map[string]interface{}
+	Pattern Pattern `cj:"-" json:"pattern"`
 }
 
 // Default creates a default template instance

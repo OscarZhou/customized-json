@@ -17,6 +17,39 @@
                 // $("#template").addClass("card")
             })
 
+            $("#export").click(function(){
+                var names = []
+                $("span[name='pattern_name']").each(function(){
+                    var name = $(this).text()
+                    if (name != "") {
+                        names.push(name)
+                    }
+                })
+
+                alert("name = "+names)
+                
+                var values = []
+                $("textare[name='pattern_value']").each(function(){
+                    var value = $(this).text()
+                    if (value != "") {
+                        values.push(value)
+                    }
+                    values.push(value)
+                })
+
+                alert("value = "+value)
+
+                var keyPairs = []
+                for (var i=0; i<names.length; i++){
+                        var keyPair = names[i]+" "+values[i]
+                        keyPairs.push(keyPair)
+                }
+                var keys = keyPairs.join(", ")
+                $.post("http://localhost:7000/GenerateModel/"+$("#filename").val(), 
+                {content:keys},
+                function(result){
+                })
+            })
          
         })
     </script>
@@ -24,7 +57,6 @@
 
 <body>
     <div class="container col-lg-8 col-lg-push-2">
-        
         <form action="/GenerateModel" method="POST">
             <div class="col-sm-4 col-sm-push-8 float-left">
                     <h3>
@@ -52,7 +84,7 @@
                         <tr scope="row">
                             <th> {{ $i }}</th>
                             <td>
-                                {{ $v }}
+                                <span name="pattern_name" > {{ $v }}</span>
                             </td>
                             <td>
                                <textarea name="pattern_value" >
@@ -63,7 +95,6 @@
                         {{end}}
                     </tbody>
                 </table>
-            <input id="save" type="submit" class="btn btn-primary" value="Save Structure" />
             <input id="export" type="button" class="btn btn-primary" value="Export JSON" />
             </div>
            

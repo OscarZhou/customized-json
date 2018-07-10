@@ -21,3 +21,11 @@ func GetPattern(ctx *gin.Context, p logic.Mapper) {
 	})
 	return
 }
+
+func SetPattern(ctx *gin.Context, p logic.Assembler, s string) {
+	err := p.Assemble(s)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+		return
+	}
+}
