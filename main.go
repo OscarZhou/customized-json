@@ -104,6 +104,12 @@ func init() {
 
 }
 
+func groupContainer(fn func(ctx *gin.Context, r models.Route)) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		r := models.Route{}
+		fn(ctx, r)
+	}
+}
 func createModelHandler(ctx *gin.Context) {
 	t, err := template.ParseFiles("templates/create_model.html")
 	if err != nil {
@@ -227,6 +233,9 @@ func main() {
 	r.GET("/AddPattern", mapContainer(api.GetPattern))
 	r.GET("/GetTemplate", templateContainer(api.GetTemplate))
 	r.POST("/SetPattern", assembleContainer(api.SetPattern))
+
+	r.GET("/ViewRoute", models.GetRoute)
+	r.POST("/SetRoute", groupContainer(models.SetRoute))
 
 	// r.Handle("GET", "/CreateModel", makeHandler(indexHandler))
 	r.Run(":7000")

@@ -16,7 +16,6 @@ type Config struct {
 	Title string
 
 	Templates []Template
-
 	// registers all http methods that the APIs
 	// contain
 	RegisteryAPIMethods map[string]string
@@ -25,18 +24,15 @@ type Config struct {
 }
 
 func NewConfig(t []Template) *Config {
-
 	config := &Config{
 		RegisteryAPIMethods: make(map[string]string),
 	}
 
 	config.Templates = append(config.Templates, t...)
-
 	config.RegisteryAPIMethods["Get"] = "GET"
 	config.RegisteryAPIMethods["Post"] = "POST"
 	config.RegisteryAPIMethods["Patch"] = "PATCH"
 	config.RegisteryAPIMethods["Delete"] = "DELETE"
-
 	return config
 }
 
